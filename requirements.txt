@@ -1,0 +1,23 @@
+openai>=1.0.0
+pyttsx3
+pystray
+tk
+python-dotenv
+plyer
+requests
+pygame
+pyautogui
+opencv-python
+pytesseract
+pillow
+speechrecognition==3.10.0
+pygetwindow
+psycopg2
+speechbrain
+torchaudio
+torch
+transformers
+soundfile
+# PyAudio рекомендуется устанавливать через pipwin:
+# pip install pipwin
+# pipwin install pyaudio

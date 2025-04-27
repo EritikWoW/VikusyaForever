@@ -1,0 +1,25 @@
+# Виртуальное окружение
+venv/git add .
+pretrained_models/
+wav2vec2_checkpoints/
+
+# Кеш и временные файлы
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.sqlite
+.DS_Store
+
+# Логи и временные данные
+data/
+
+# Файлы конфигураций с ключами (если не хочешь коммитить ключи)
+.env
+
+# VSCode настройки (если не нужно)
+.vscode/
+
+# PyCharm настройки (если не нужно)
+.idea/
