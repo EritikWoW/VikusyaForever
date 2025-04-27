@@ -1,5 +1,5 @@
 # Виртуальное окружение
-venv/git add .
+venv/
 pretrained_models/
 wav2vec2_checkpoints/
 
@@ -17,6 +17,7 @@ data/
 
 # Файлы конфигураций с ключами (если не хочешь коммитить ключи)
 .env
+.gitignore
 
 # VSCode настройки (если не нужно)
 .vscode/

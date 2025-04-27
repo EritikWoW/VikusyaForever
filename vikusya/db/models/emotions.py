@@ -1,38 +1,59 @@
 from vikusya.db.connection import get_connection
-from vikusya.utils.logger import log_action
+from vikusya.utils.logger import log_action, log_error
 
-def insert_emotion(name):
+def insert_emotion(name, description=None):
+    """
+    Добавляет эмоцию, если её ещё нет.
+    """
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute(
-        "INSERT INTO Emotions (Name) VALUES (%s) ON CONFLICT (Name) DO NOTHING RETURNING Id;",
-        (name,)
-    )
-    emotion_row = cursor.fetchone()
-    if emotion_row:
-        log_action(f"Добавила новую эмоцию: '{name}'", category="emotions")
-
-    if emotion_row is None:
-        cursor.execute("SELECT Id FROM Emotions WHERE Name = %s;", (name,))
+    try:
+        cursor.execute(
+            "INSERT INTO Emotions (Name, Description) VALUES (%s, %s) ON CONFLICT (Name) DO NOTHING RETURNING Id;",
+            (name, description)
+        )
         emotion_row = cursor.fetchone()
+        if emotion_row:
+            log_action(f"Добавила новую эмоцию: '{name}'", category="emotions")
 
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return emotion_row[0]
+        if emotion_row is None:
+            cursor.execute("SELECT Id FROM Emotions WHERE Name = %s;", (name,))
+            emotion_row = cursor.fetchone()
 
-def link_phrase_emotion(phrase_id, emotion_id, weight):
+        return emotion_row[0] if emotion_row else None
+
+    except Exception as e:
+        log_error(f"Ошибка при добавлении эмоции '{name}': {e}", category="emotions")
+        return None
+    finally:
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+def get_emotion_id(name):
+    """
+    Получает ID эмоции по её названию.
+    """
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute(
-        """
-        INSERT INTO PhraseEmotions (PhraseId, EmotionId, Weight)
-        VALUES (%s, %s, %s)
-        ON CONFLICT (PhraseId, EmotionId) DO UPDATE SET Weight = EXCLUDED.Weight;
-        """,
-        (phrase_id, emotion_id, weight)
-    )
-    log_action(f"Связала фразу ID {phrase_id} с эмоцией ID {emotion_id} (вес {weight})", category="emotions")
-    conn.commit()
-    cursor.close()
-    conn.close()
+    try:
+        cursor.execute("SELECT Id FROM Emotions WHERE Name = %s;", (name,))
+        result = cursor.fetchone()
+        return result[0] if result else None
+    finally:
+        cursor.close()
+        conn.close()
+
+def get_all_emotions():
+    """
+    Возвращает список всех эмоций.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT Id, Name, Description FROM Emotions ORDER BY Name;")
+        emotions = cursor.fetchall()
+        return emotions
+    finally:
+        cursor.close()
+        conn.close()

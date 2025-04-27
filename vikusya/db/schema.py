@@ -2,7 +2,9 @@ from vikusya.db.connection import get_connection
 from vikusya.utils.logger import log_action, log_error
 
 def init_database():
-    """Создаёт таблицы, если их ещё нет. Логирует только реальные действия."""
+    """
+    Инициализирует структуру БД для Викуси: создает все необходимые таблицы.
+    """
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -14,34 +16,55 @@ def init_database():
                 Description TEXT
             );
         """,
-        "UserPhrases": """
-            CREATE TABLE IF NOT EXISTS UserPhrases (
+        "Lexemes": """
+            CREATE TABLE IF NOT EXISTS Lexemes (
                 Id SERIAL PRIMARY KEY,
-                Phrase TEXT NOT NULL UNIQUE
+                Word VARCHAR(255) NOT NULL UNIQUE,
+                PartOfSpeech VARCHAR(50),
+                Gender VARCHAR(20),
+                Animate BOOLEAN,
+                Description TEXT
             );
         """,
-        "VikusyaResponses": """
-            CREATE TABLE IF NOT EXISTS VikusyaResponses (
+        "VerbRequirements": """
+            CREATE TABLE IF NOT EXISTS VerbRequirements (
                 Id SERIAL PRIMARY KEY,
-                Response TEXT NOT NULL,
-                Source VARCHAR(50) DEFAULT 'manual',
-                Context VARCHAR(255) NOT NULL DEFAULT 'general',
+                Verb VARCHAR(255) NOT NULL UNIQUE,
+                RequiresPreposition BOOLEAN DEFAULT FALSE,
+                Preposition VARCHAR(50),
+                RequiredCase VARCHAR(50)
+            );
+        """,
+        "LexemeEmotionWeights": """
+            CREATE TABLE IF NOT EXISTS LexemeEmotionWeights (
+                LexemeId INT REFERENCES Lexemes(Id),
+                EmotionId INT REFERENCES Emotions(Id),
+                Weight FLOAT CHECK (Weight >= 0 AND Weight <= 1),
+                PRIMARY KEY (LexemeId, EmotionId)
+            );
+        """,
+        "Intentions": """
+            CREATE TABLE IF NOT EXISTS Intentions (
+                Id SERIAL PRIMARY KEY,
+                SubjectId INT REFERENCES Lexemes(Id),
+                VerbId INT REFERENCES Lexemes(Id),
+                ObjectId INT REFERENCES Lexemes(Id),
+                Modifier TEXT,
                 CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         """,
-        "PhraseEmotions": """
-            CREATE TABLE IF NOT EXISTS PhraseEmotions (
-                PhraseId INT REFERENCES UserPhrases(Id),
-                EmotionId INT REFERENCES Emotions(Id),
-                Weight FLOAT CHECK (Weight >= 0 AND Weight <= 1),
-                PRIMARY KEY (PhraseId, EmotionId)
+        "PositivePhrases": """
+            CREATE TABLE IF NOT EXISTS PositivePhrases (
+                Id SERIAL PRIMARY KEY,
+                Phrase TEXT NOT NULL UNIQUE,
+                CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         """,
-        "PhraseResponses": """
-            CREATE TABLE IF NOT EXISTS PhraseResponses (
-                PhraseId INT REFERENCES UserPhrases(Id),
-                ResponseId INT REFERENCES VikusyaResponses(Id),
-                PRIMARY KEY (PhraseId, ResponseId)
+        "NegativePhrases": """
+            CREATE TABLE IF NOT EXISTS NegativePhrases (
+                Id SERIAL PRIMARY KEY,
+                Phrase TEXT NOT NULL UNIQUE,
+                CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         """,
         "Interactions": """
@@ -54,43 +77,16 @@ def init_database():
                 Rating INT,
                 Notes TEXT
             );
-        """,
-        "PositivePhrases": """
-            CREATE TABLE IF NOT EXISTS PositivePhrases(
-                Id SERIAL PRIMARY KEY,
-                Phrase TEXT NOT NULL UNIQUE,
-                CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-         """,
-        "NegativePhrases": """
-            CREATE TABLE IF NOT EXISTS NegativePhrases(
-                Id SERIAL PRIMARY KEY,
-                Phrase TEXT NOT NULL UNIQUE,
-                CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
         """
     }
 
     for table_name, create_sql in tables.items():
         try:
-            # Проверяем, есть ли таблица ПЕРЕД созданием:
-            cursor.execute("""
-                           SELECT COUNT(*)
-                           FROM information_schema.tables
-                           WHERE table_name = %s;
-                           """, (table_name.lower(),))
-            exists = cursor.fetchone()[0]
-
             cursor.execute(create_sql)
-            conn.commit()
-
-            if exists == 0:
-                log_action(f"Создала таблицу '{table_name}'", category="database")
-            # Если таблица уже была, ничего не логируем!
+            log_action(f"Таблица '{table_name}' проверена или создана", category="database")
         except Exception as e:
             log_error(f"Ошибка при создании таблицы '{table_name}': {e}", category="database")
 
+    conn.commit()
     cursor.close()
     conn.close()
-
-
