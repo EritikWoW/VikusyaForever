@@ -1,18 +1,16 @@
 import threading
-import json
 import speech_recognition as sr
 import numpy as np
 import torch
-import os
 from vikusya.speech import speak, stop_current_playback
 from vikusya.ai import ask_openai
-from vikusya.generator.phrase_builder import get_random_phrase_for_context, teach_phrase
+from vikusya.generator.phrase_builder import get_random_phrase_for_context
 from vikusya.utils.text_utils import interpret_yes_no
 from vikusya.vision import ocr_image
-from vikusya.utils.logger import log_action, log_error
 from vikusya.area_capture import select_area_and_screenshot
 from speechbrain.inference.interfaces import foreign_class
 from speechbrain.utils.fetching import LocalStrategy
+from vikusya.db.repositories.lexemes import get_or_create_lexeme
 
 stop_playback = stop_current_playback
 
@@ -143,8 +141,13 @@ def handle_dialog(text):
 
     response = get_random_phrase_for_context(text)
     if not response:
+        # Если не нашли подходящей фразы — попросим GPT придумать ответ
         response = ask_openai(f"Ты — Викуся. Ответь на фразу '{text}' с любовью и заботой.")
-        teach_phrase("general_conversation", response, source="gpt")
+
+        # Учим Викусю новым словам — добавляем все слова ответа как лексемы
+        words = response.split()
+        for word in words:
+            get_or_create_lexeme(word.strip())
 
     return response
 

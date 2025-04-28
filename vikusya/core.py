@@ -1,22 +1,29 @@
 import os
 from dotenv import load_dotenv
 from vikusya.speech import speak, speak_contextual
-from vikusya.generator.phrase_builder import generate_phrase_for_intention
-from vikusya.generator.interaction_service import remember_interaction, recall_interactions
+from vikusya.generator.interaction_service import remember_interaction
 from vikusya.ai import ask_openai
 from vikusya.vision import screenshot_and_read
 from vikusya.voice import start_listening, listen_for_command
 from vikusya.utils.text_utils import interpret_yes_no
-from vikusya.utils.screenshot_utils import should_take_screenshot
+from vikusya.utils.screenshot_utils import should_take_screenshot, load_trigger_words
 from vikusya.db.init_db import init_database
 from vikusya.utils.logger import log_action, log_error
+from vikusya.db.connection import create_database_if_not_exists, engine
 
 class Vikusya:
     def __init__(self):
         load_dotenv()
+
+        create_database_if_not_exists()
+
         init_database()
+
+        load_trigger_words()
         start_listening()
+
         self.api_key = os.getenv("OPENAI_API_KEY")
+
         log_action("Старт ассистента", category="system")
 
     def run(self):
