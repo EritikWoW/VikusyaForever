@@ -19,6 +19,7 @@ torch
 transformers
 soundfile
 sqlalchemy
+pymorphy2
 # PyAudio рекомендуется устанавливать через pipwin:
 # pip install pipwin
 # pipwin install pyaudio
