@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, Text, ForeignKey, TIMESTAMP
-from vikusya.db.models import base
+from vikusya.db.models.base import Base
 
-class Intention(base):
+class Intention(Base):
     __tablename__ = 'Intentions'
 
     Id = Column(Integer, primary_key=True)

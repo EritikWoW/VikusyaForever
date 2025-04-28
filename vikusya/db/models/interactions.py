@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, Text, String, TIMESTAMP
-from vikusya.db.models import base
+from vikusya.db.models.base import Base
 
-class Interaction(base):
+class Interaction(Base):
     __tablename__ = 'Interactions'
 
     Id = Column(Integer, primary_key=True)

@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Text
-from vikusya.db.models import base
+from vikusya.db.models.base import Base
 
-class Emotion(base):
+class Emotion(Base):
     __tablename__ = "Emotions"
 
     Id = Column(Integer, primary_key=True, index=True)

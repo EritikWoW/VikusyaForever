@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, Boolean, String
-from vikusya.db.models import base
+from vikusya.db.models.base import Base
 
-class VerbRequirement(base):
+class VerbRequirement(Base):
     __tablename__ = 'VerbRequirements'
 
     Id = Column(Integer, primary_key=True)

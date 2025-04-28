@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, Text
-from vikusya.db.models import base
+from vikusya.db.models.base import Base
 
-class Lexeme(base):
+class Lexeme(Base):
     __tablename__ = 'Lexemes'
 
     Id = Column(Integer, primary_key=True)
