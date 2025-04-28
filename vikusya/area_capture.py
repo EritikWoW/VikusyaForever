@@ -1,13 +1,19 @@
 import os
-from PIL import ImageGrab
 import tkinter as tk
+from PIL import ImageGrab
 from vikusya.utils.logger import log_action, log_error
 
 def select_area_and_screenshot(save_path="data/screenshots/selected_area.png"):
-    """Позволяет выбрать область экрана и делает скриншот выделенного участка."""
+    """
+    Позволяет пользователю выбрать область экрана и сохраняет скриншот выбранного участка.
+
+    :param save_path: Путь для сохранения скриншота.
+    :return: Путь к сохранённому файлу или None, если операция отменена.
+    """
     try:
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
+        # Настройка окна выбора области
         root = tk.Tk()
         root.attributes("-fullscreen", True)
         root.attributes("-alpha", 0.3)
@@ -31,7 +37,7 @@ def select_area_and_screenshot(save_path="data/screenshots/selected_area.png"):
         def on_mouse_up(event):
             nonlocal end_x, end_y
             end_x, end_y = event.x, event.y
-            root.quit()  # Использую quit вместо destroy для чистого выхода
+            root.quit()
 
         canvas.bind("<ButtonPress-1>", on_mouse_down)
         canvas.bind("<B1-Motion>", on_mouse_move)
@@ -40,16 +46,18 @@ def select_area_and_screenshot(save_path="data/screenshots/selected_area.png"):
         root.mainloop()
         root.destroy()
 
-        # Проверяем, что область действительно выбрана:
+        # Проверка: выбрал ли пользователь реальную область
         if start_x == end_x or start_y == end_y:
-            log_action("Выделение области для скриншота отменено пользователем", category="screenshot")
+            log_action("Выделение области отменено пользователем", category="screenshot")
             return None
 
+        # Создание скриншота
         x1, y1 = min(start_x, end_x), min(start_y, end_y)
         x2, y2 = max(start_x, end_x), max(start_y, end_y)
         screenshot = ImageGrab.grab(bbox=(x1, y1, x2, y2))
         screenshot.save(save_path)
-        log_action(f"Сделала скриншот выделенной области, сохранила в {save_path}", category="screenshot")
+
+        log_action(f"Сделала скриншот выделенной области: {save_path}", category="screenshot")
         return save_path
 
     except Exception as e:

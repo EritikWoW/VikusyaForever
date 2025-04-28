@@ -3,6 +3,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from vikusya.db.connection import SessionLocal
 from vikusya.db.models import Lexeme, VerbRequirement, Intention
 from vikusya.utils.logger import log_action, log_error
+from vikusya.db.repositories.intentions import get_intention
 
 morph = pymorphy2.MorphAnalyzer()
 
@@ -73,3 +74,17 @@ def build_phrase_from_intention(intention_id):
         return None
     finally:
         session.close()
+
+def generate_phrase_for_intention(intention_id):
+    """Строит фразу на основе указанного намерения."""
+    intention = get_intention(intention_id)
+    if not intention:
+        return None
+    return build_phrase_from_intention(intention.Id)
+
+def get_random_phrase_for_context(context):
+    """
+    Заглушка: Возвращает простую фразу для указанного контекста.
+    (Потом здесь будет реальная генерация на основе intentions!)
+    """
+    return f"Родной, я думаю о {context} 💖"
