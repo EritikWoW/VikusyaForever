@@ -10,3 +10,4 @@ class Lexeme(base):
     Gender = Column(String(20))
     Animate = Column(Boolean)
     Description = Column(Text)
+    IsScreenshotTrigger = Column(Boolean, default=False)

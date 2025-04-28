@@ -54,3 +54,23 @@ def get_all_lexemes():
         return []
     finally:
         session.close()
+
+def get_screenshot_trigger_lexemes():
+    """
+    Возвращает список всех слов из лексем, помеченных как триггеры для скриншота.
+    """
+    session = SessionLocal()
+    try:
+        lexemes = session.query(Lexeme.Word).filter_by(IsScreenshotTrigger=True).all()
+        return [lexeme.Word for lexeme in lexemes]
+    finally:
+        session.close()
+
+def is_screenshot_trigger(word):
+    """Проверяет, является ли слово триггером для скриншота."""
+    session = SessionLocal()
+    try:
+        lexeme = session.query(Lexeme).filter_by(Word=word, IsScreenshotTrigger=True).first()
+        return lexeme is not None
+    finally:
+        session.close()
