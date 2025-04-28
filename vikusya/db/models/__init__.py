@@ -1,8 +1,7 @@
-# Импортируем все функции из отдельных файлов моделей
-from . import emotions
-from . import lexemes
-from . import verb_requirements
-from . import intentions
-from . import interactions
-from . import lexeme_emotion_weights
-from . import phrases
+from .base import Base
+from .emotions import Emotion
+from .intentions import Intention
+from .interactions import Interaction
+from .lexemes import Lexeme
+from .verb_requirements import VerbRequirement
+from .lexeme_emotion_weights import LexemeEmotionWeight

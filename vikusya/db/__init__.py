@@ -1,2 +1,2 @@
-from . import connection
-from . import schema
+from .connection import SessionLocal, engine
+from .init_db import init_database
